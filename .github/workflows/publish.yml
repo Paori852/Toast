@@ -7,7 +7,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: toast-distribution-${{ github.ref_name }}
+  group: toast-distribution
   cancel-in-progress: false
 
 jobs:
