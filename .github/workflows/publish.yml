@@ -1,0 +1,33 @@
+name: Verify and publish Toast installers
+on:
+  push:
+    branches:
+      - 'release-staging/v*'
+      - 'release-check/v*'
+permissions:
+  contents: read
+concurrency:
+  group: toast-distribution-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event.created || !github.event.deleted
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Install update signature verifier
+        run: |
+          if ! command -v minisign >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y minisign
+          fi
+      - name: Verify installers and publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: bash scripts/publish.sh "$GITHUB_REF_NAME"
